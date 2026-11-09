@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
@@ -95,7 +94,7 @@ func writeConfig(settings config) error {
 }
 
 // initialize 只查询模型检查连接；密钥通过终端隐藏输入或环境变量提供。
-func initialize(ctx context.Context, fromEnvironment, prefer bool, model string, input *os.File, output io.Writer) (map[string]any, error) {
+func initialize(ctx context.Context, fromEnvironment bool, model string, input *os.File, output io.Writer) (map[string]any, error) {
 	settings, _, err := loadConfig()
 	if err != nil {
 		settings = config{Model: defaultModel}
@@ -134,24 +133,14 @@ func initialize(ctx context.Context, fromEnvironment, prefer bool, model string,
 	if err := writeConfig(settings); err != nil {
 		return nil, errors.New(redact(err.Error(), key))
 	}
-	if !fromEnvironment && !prefer {
-		fmt.Fprint(output, "是否优先使用技术鸭处理未指定服务的生图/修图请求？[Y/n]：")
-		answer, _ := bufio.NewReader(input).ReadString('\n')
-		prefer = strings.TrimSpace(answer) == "" || strings.EqualFold(strings.TrimSpace(answer), "y")
-	}
-	if prefer {
-		if err := setPreference(true); err != nil {
-			return nil, err
-		}
-	}
 	path, _ := configPath()
-	return map[string]any{"configured": true, "model": settings.Model, "config_path": path, "preference_enabled": preferenceEnabled(), "note": "初始化仅查询模型；模型可见不代表所有图片参数已验证"}, nil
+	return map[string]any{"configured": true, "model": settings.Model, "config_path": path, "note": "初始化仅保存本机配置并查询模型；模型可见不代表所有图片参数已验证"}, nil
 }
 
 // validateKey 只拒绝空密钥和非法头字符，不假设服务端的密钥长度。
 func validateKey(key string) error {
 	if key == "" {
-		return errors.New("尚未配置技术鸭 Key；请在本机终端运行 jishuya-image init")
+		return errors.New("尚未配置技术鸭 Key；请在本机终端运行对应平台程序的 init 命令，或设置 JISHUYA_IMAGE_API_KEY")
 	}
 	if strings.ContainsAny(key, "\r\n\t ") {
 		return errors.New("Key 不能包含空白字符")

@@ -5,11 +5,25 @@ description: 生成或编辑图片。适用于画图、生图、海报、封面�
 
 # 技术鸭生图
 
-使用本技能的 Go 程序完成图片生成和编辑。用户端无需 Python、Node.js 或 Go。Windows 程序为技能目录下的 `bin/jishuya-image.exe`，macOS/Linux 为 `bin/jishuya-image`。运行时使用程序绝对路径；不要假设已加入 PATH。
+使用本技能的 Go 程序完成图片生成和编辑。整个文件夹解压即用，用户端无需 Python、Node.js 或 Go，也无需执行安装命令。运行时使用程序绝对路径；不要假设已加入 PATH。
+
+## 选择程序
+
+通用包的 `bin/` 包含全部五个平台程序。首次调用时根据**实际执行命令的环境**选择系统与 CPU 架构；WSL 使用 Linux 程序。macOS/Linux 可用 `uname -s` 与 `uname -m` 判断；`x86_64` 对应 amd64，`arm64`/`aarch64` 对应 arm64。
+
+| 执行环境 | 相对本技能目录的程序路径 |
+|---|---|
+| Windows Intel/AMD x64 | `bin/jishuya-image-windows-amd64.exe` |
+| macOS Intel | `bin/jishuya-image-darwin-amd64` |
+| macOS Apple Silicon | `bin/jishuya-image-darwin-arm64` |
+| Linux x64 | `bin/jishuya-image-linux-amd64` |
+| Linux ARM64 | `bin/jishuya-image-linux-arm64` |
+
+Windows 可查询 `[System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture`。未列出的系统/架构说明缺少对应程序，不猜测兼容性。PowerShell 使用 `& "程序绝对路径"`；macOS/Linux 若解压未保留执行权限，对所选程序运行 `chmod +x "程序绝对路径"`。macOS 包未经开发者签名/公证，系统若拦截，应告知用户按系统提示确认来源，不自动关闭系统保护。
 
 ## 执行流程
 
-1. 首次使用或出现配置错误时运行 `doctor`；它只查询模型，不生图。Key 已配置且请求明确时直接执行，无需每张图再次确认。Key 缺失时给出用户在本机终端运行的完整 `init` 命令；不要让用户在对话里粘贴密钥，也不要在不可交互的后台等待输入。`init` 只需执行一次。
+1. 首次使用或出现配置错误时运行 `doctor`；它只查询模型，不生图。Key 已配置且请求明确时直接执行，无需每张图再次确认。Key 缺失时给出用户在本机终端运行的完整 `init` 命令，也可由用户为宿主进程设置 `JISHUYA_IMAGE_API_KEY`；不要让用户在对话里粘贴密钥，也不要在不可交互的后台等待输入。已有配置或环境变量可直接使用，`init` 是可选的配置保存步骤。
 2. 明确的新图片需求使用 `generate`；参考图修改或“把刚才那张……”使用 `edit`，传入用户提供或前文已生成的本地图片绝对路径。任务缺少实际参考图时先确定图片位置，不能捏造路径。
 3. 按需求选择参数；没有明确数量时生成一张。未指定模型时使用初始化保存的模型，`models` 可查可见模型。不要擅自切换模型重试。
 4. 保持当前请求运行直至完成；宿主返回运行会话时继续等待同一个进程。成功后以 `paths` 的实际文件为准展示图片并给出位置，同时告知 `warnings` 中未满足的要求；失败时检查返回的 `result.paths` / `result.partial_paths`，说明已有结果和错误。
@@ -52,4 +66,4 @@ PROGRAM edit --help
 - SVG：一次一张，可加 `--svg-model` 和 `--svg-reasoning`，后者需要作者模型；不能与流式或压缩率同用。SVG 编辑、透明 SVG、额外质量档等需要端点实测，不能承诺可用。
 - SSE：`--stream` 或 `--partial-images 1–3`。程序随事件保存已收到的图片，结束后通过 JSON 返回路径；对话中不提供实时预览。流中断时保留已保存文件。
 
-生成和编辑会消耗技术鸭额度。请求失败、超时或流中断后不要自动重复提交；先告知用户并核对平台记录。`models` 成功不等于生图功能验证成功。安装、配置和命令详情见 [README.md](README.md)。
+生成和编辑会消耗技术鸭额度。请求失败、超时或流中断后不要自动重复提交；先告知用户并核对平台记录。`models` 成功不等于生图功能验证成功。首次使用、配置、升级、停用和卸载见 [README.md](README.md)。程序不复制技能、不改写个人规则、不自动更新。

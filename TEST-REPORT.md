@@ -1,4 +1,28 @@
-# 技术鸭生图 v2.0.1 验证报告
+# 技术鸭生图 v2.1.0 验证报告
+
+日期：2026-11-09（Asia/Shanghai）。本次统一为通用免安装包，图片 API 请求与解析代码未改变，没有新增真实生图调用。下面先列出 v2.1.0 本地验证，再保留 v2.0.x 的接口历史记录；旧版本的请求次数、覆盖率和 SHA-256 不代表当前包。
+
+## v2.1.0 免安装改动与验证
+
+- 删除安装、偏好写入及其嵌入资源逻辑。`init` 只保存用户配置并查询模型；环境变量可直接使用，不必初始化。旧 `install` / `uninstall` 命令返回迁移提示，`init --prefer` 明确拒绝。
+- `doctor` 报告实际程序路径、平台、`mode: portable` 和 Key 来源，不检测安装状态或修改个人规则。原有用户配置目录与读取格式保持兼容。
+- 一个 `jishuya-image-v2.1.0-universal.zip`，根目录为 `jishuya-image/`，白名单恰好 9 个文件，包含五个平台的程序和四个文档/元数据文件。发布工具使用 `CGO_ENABLED=0` 编译。
+- `go test ./... -count=1 -json`：**71 个测试事件通过**（含子测试），两个包通过，0 失败。新增初始化仅保存配置、免安装命令无副作用、通用包白名单及文件权限测试；已移除旧安装器专属测试。
+- `go vet ./...` 和技能结构校验通过。结构校验使用开发机工具，发行包不包含 Python，也不需要用户安装 Python。
+- 发行包检查：SHA-256 一致；包内文档与源码相同；没有 Key 模式或无关品牌；程序为 Windows PE/x64、macOS Mach-O/x64 与 ARM64、Linux ELF/x64 与 ARM64；文档权限 0644、程序权限 0755。
+- Windows 从 ZIP 解压到含中文与空格的路径后，版本查询及离线诊断通过；子进程 PATH 仅包含 Windows 系统目录。环境变量模式不创建用户目录或配置，缺 Key 时明确报错。
+- 隔离目录中以旧版包模拟整体升级，Key 配置与用户文件保留；移出技能目录、移回、卸载移出后重新解压，均保留并可复用配置。此检查验证文件操作与程序行为，未模拟宿主刷新技能列表。
+- 当前用户技能副本已整体替换为通用版，9 个文件与 ZIP 一致；`doctor --offline` 成功，读取现有配置，Key 配置和个人规则哈希未变。旧副本、旧源码程序和旧 ZIP 均移到发现目录之外归档。
+
+当前 ZIP SHA-256：`02d9a6161ddcf65af07a88a30301a55d14119740eb404cdedb04c9e656c3d8d7`。
+
+交付位置：`D:\project\jishuya-newapi\jishuya-image-validation\dist`；可直接使用的完整文件夹为同目录上一级的 `jishuya-image/`。`D:\XT\zm\jishuya-image.zip` 同步为通用包。检查证据：验证目录中的 `evidence/portable-go-tests.jsonl`、`evidence/portable-package-checks.json`、`evidence/portable-local-upgrade.json`；可重复执行的包检查脚本为 `evidence/check-portable.ps1`。
+
+本轮未覆盖：macOS/Linux 实机运行、macOS 系统来源确认、新对话自动触发率、宿主实际停用刷新、真实删除用户配置。API 能力边界沿用下方实测结果，不宣称全功能均通过。v2.0.x 文件已归档到 `archive/pre-portable-20261109`，没有再次付费生图。
+
+---
+
+# 历史记录：v2.0.1 接口验证
 
 日期：2026-11-09（Asia/Shanghai）。结论：GIF 动画和流式最终图片已验证；仍不能宣称全功能支持。失败项按实际文件与像素检查判定，不以 HTTP 200 或命令退出码代替功能验收。
 

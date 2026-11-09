@@ -1,5 +1,1 @@
-e51828b0c3b7d9d1a99057d0ed2a921e44ec602603814bb3bf98b4a8de61cd09  jishuya-image-v2.0.1-windows-amd64.zip
-6d8aacfe6a749dfea483aa5194c939311d1e3a03995ce1eea08c5e9aba02d4c9  jishuya-image-v2.0.1-darwin-amd64.zip
-322c7ff27aaa0b9449396e517f2504c9894d48a5042f5916c2bcf382b45d968b  jishuya-image-v2.0.1-darwin-arm64.zip
-dde96a0222106388d19719a97194879411270bbad44e0e84d9bf07f9d284cca6  jishuya-image-v2.0.1-linux-amd64.zip
-30e3dac826139d3fa34adb9925f4f50fef7ca740b662fbe93162c30bd8168072  jishuya-image-v2.0.1-linux-arm64.zip
+02d9a6161ddcf65af07a88a30301a55d14119740eb404cdedb04c9e656c3d8d7  jishuya-image-v2.1.0-universal.zip

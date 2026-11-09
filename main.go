@@ -9,17 +9,17 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"slices"
 )
 
-var version = "2.0.1"
+var version = "2.1.0"
 
-const usage = `技术鸭生图 — 无需安装语言运行环境
+const usage = `技术鸭生图 — 解压即用，无需安装语言运行环境
 
 命令：
-  install --codex [--prefer | --no-prefer]     安装技能及可选默认偏好
-  init [--from-env] [--model 模型] [--prefer]  配置 Key 并查询模型验证
+  init [--from-env] [--model 模型]           可选：保存本机 Key 并查询模型验证
   doctor [--offline]                        检查配置和连接
   models                                   查询当前 Key 可见的全部模型
   generate --prompt "图片需求" [选项]       生成图片
@@ -37,25 +37,23 @@ func runCLI(ctx context.Context, args []string, input *os.File, output io.Writer
 		return nil, nil
 	}
 	command := args[0]
+	if command == "install" || command == "uninstall" {
+		return nil, errors.New("当前版本统一免安装：解压后直接使用；放入技能目录即可发现，升级或卸载请按 README 操作文件夹")
+	}
 	if command == "version" {
 		if len(args) != 1 {
 			return nil, errors.New("version 不接受参数")
 		}
 		return map[string]string{"version": version, "platform": runtime.GOOS + "/" + runtime.GOARCH}, nil
 	}
-	if command == "install" || command == "init" || command == "doctor" {
+	if command == "init" || command == "doctor" {
 		flags := flag.NewFlagSet(command, flag.ContinueOnError)
 		flags.SetOutput(output)
-		var codex, prefer, noPrefer, fromEnv, offline bool
+		var fromEnv, offline bool
 		var model string
 		switch command {
-		case "install":
-			flags.BoolVar(&codex, "codex", false, "安装到 Codex")
-			flags.BoolVar(&prefer, "prefer", false, "启用技术鸭默认偏好")
-			flags.BoolVar(&noPrefer, "no-prefer", false, "移除技术鸭默认偏好")
 		case "init":
 			flags.BoolVar(&fromEnv, "from-env", false, "从环境变量读取 Key")
-			flags.BoolVar(&prefer, "prefer", false, "启用技术鸭默认偏好")
 			flags.StringVar(&model, "model", "", "默认图片模型")
 		case "doctor":
 			flags.BoolVar(&offline, "offline", false, "仅检查本机配置，不访问网络")
@@ -67,13 +65,8 @@ func runCLI(ctx context.Context, args []string, input *os.File, output io.Writer
 			return nil, errors.New("存在无法识别的位置参数")
 		}
 		switch command {
-		case "install":
-			if !codex {
-				return nil, errors.New("请使用 install --codex")
-			}
-			return installSkill(prefer, noPrefer)
 		case "init":
-			return initialize(ctx, fromEnv, prefer, model, input, output)
+			return initialize(ctx, fromEnv, model, input, output)
 		case "doctor":
 			return diagnose(ctx, offline)
 		}
@@ -113,16 +106,15 @@ func diagnose(ctx context.Context, offline bool) (map[string]any, error) {
 		return nil, err
 	}
 	path, _ := configPath()
-	directory, directoryErr := skillDirectory()
-	installed := false
-	if directoryErr == nil {
-		_, err := os.Stat(directory + string(os.PathSeparator) + "SKILL.md")
-		installed = err == nil
+	executable, err := os.Executable()
+	if err != nil {
+		return nil, err
 	}
-	result := map[string]any{"version": version, "platform": runtime.GOOS + "/" + runtime.GOARCH, "key_configured": settings.APIKey != "", "key_source": source, "config_path": path, "model": settings.Model, "skill_directory": directory, "installed": installed, "preference_enabled": preferenceEnabled(), "network_checked": false}
-	if directoryErr != nil {
-		return result, directoryErr
+	executable, err = filepath.EvalSymlinks(executable)
+	if err != nil {
+		return nil, err
 	}
+	result := map[string]any{"version": version, "platform": runtime.GOOS + "/" + runtime.GOARCH, "mode": "portable", "executable": executable, "key_configured": settings.APIKey != "", "key_source": source, "config_path": path, "model": settings.Model, "network_checked": false}
 	if err := validateKey(settings.APIKey); err != nil {
 		return result, err
 	}

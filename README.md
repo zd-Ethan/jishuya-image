@@ -1,43 +1,69 @@
 # 技术鸭生图 Skill
 
-通过技术鸭生成或编辑图片。发行包自带 Go 可执行程序，用户不需要安装 Python、Node.js 或 Go。源码构建才需要 Go。
+通过技术鸭生成或编辑图片。统一采用免安装方式：解压一个文件夹即可使用，包内包含五个平台程序，AI 按执行环境选择。用户不需要安装 Python、Node.js 或 Go；源码构建才需要 Go。
 
-## 安装与首次配置
+## 下载与使用位置
 
-当前发行版为 **v2.0.1**。请下载完整 ZIP，不要只复制 `SKILL.md`：
+当前发行版为 **v2.1.0**。所有受支持系统下载同一个 [通用免安装包](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.1.0-universal.zip)，[SHA-256 校验清单](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/SHA256SUMS.txt) 与包同目录。请解压并保留整个 `jishuya-image` 文件夹：
 
-| 系统 | 下载 |
-|---|---|
-| Windows x64 | [jishuya-image-v2.0.1-windows-amd64.zip](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.0.1-windows-amd64.zip) |
-| macOS Intel | [jishuya-image-v2.0.1-darwin-amd64.zip](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.0.1-darwin-amd64.zip) |
-| macOS Apple Silicon | [jishuya-image-v2.0.1-darwin-arm64.zip](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.0.1-darwin-arm64.zip) |
-| Linux x64 | [jishuya-image-v2.0.1-linux-amd64.zip](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.0.1-linux-amd64.zip) |
-| Linux ARM64 | [jishuya-image-v2.0.1-linux-arm64.zip](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.0.1-linux-arm64.zip) |
-
-每个包只带对应系统和 CPU 架构的程序。Windows 的 `jishuya-image.exe` 不能直接在 macOS/Linux 运行；这两个系统请使用对应包内的 `bin/jishuya-image`。`darwin` 表示 macOS，`amd64` 表示 Intel/AMD x64，`arm64` 适用于 Apple Silicon 或 ARM64 Linux。macOS/Linux 可用 `uname -m` 查看架构：`x86_64` 选 amd64，`arm64`/`aarch64` 选 arm64。五个平台均不需要额外安装 Python、Node.js 或 Go；macOS/Linux 当前完成交叉编译和包检查，尚未实机验证。
-
-下载对应系统和架构的压缩包并解压，在终端运行。Windows PowerShell：
-
-```powershell
-& '.\jishuya-image\bin\jishuya-image.exe' install --codex --prefer
-& '.\jishuya-image\bin\jishuya-image.exe' init
+```text
+jishuya-image/
+  SKILL.md
+  README.md
+  THIRD-PARTY-NOTICES.txt
+  agents/openai.yaml
+  bin/
+    jishuya-image-windows-amd64.exe
+    jishuya-image-darwin-amd64
+    jishuya-image-darwin-arm64
+    jishuya-image-linux-amd64
+    jishuya-image-linux-arm64
 ```
 
-macOS/Linux：
+使用位置有两种，程序均直接运行：
+
+1. **日常自动匹配**：把整个文件夹放到 Codex 用户技能目录 `~/.agents/skills/jishuya-image`，或当前项目的 `.agents/skills/jishuya-image`。Windows 用户路径一般为 `%USERPROFILE%\.agents\skills\jishuya-image`。打开新对话检查是否发现，必要时重启宿主；同名技能只保留一份。
+2. **任意目录临时使用**：解压到任意位置，在对话中说明“读取 `完整路径/jishuya-image/SKILL.md`，使用其中程序生成图片”。该位置不会仅因解压而在所有新对话自动生效，也可以直接在终端运行程序。
+
+已有版本位于 `.codex/skills/jishuya-image` 或自定义 `CODEX_HOME` 下时，可替换已被当前宿主发现的同一目录，不要再放一份重复技能。其他 Agent 将整个文件夹放入其支持的技能目录，或明确提供 `SKILL.md` 路径；发现机制以对应宿主为准。
+
+包内每个程序只适用于对应系统和架构；`SKILL.md` 内含 AI 选择表。`darwin` 表示 macOS，`amd64` 表示 Intel/AMD x64，`arm64` 表示 ARM64。macOS/Linux 用 `uname -s` 和 `uname -m` 判断：`x86_64` 选 amd64，`arm64`/`aarch64` 选 arm64。Windows 可查询 `[System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture`。WSL 应选 Linux；本包不含 Windows ARM64、32 位或其他平台原生程序。
+
+Windows 已本机运行验证；macOS/Linux 完成交叉编译及程序格式检查，尚未实机运行。macOS 包未经开发者签名/公证，可能需要用户在系统安全设置中确认来源。Unix 解压工具未保留可执行权限时，对所选程序执行 `chmod +x`。
+
+## 首次配置 Key
+
+已有本机配置会继续使用，无需重新输入。新用户可在可见终端运行对应程序的 `init`。在解压目录的上一级打开 Windows PowerShell：
+
+```powershell
+& '.\jishuya-image\bin\jishuya-image-windows-amd64.exe' init
+```
+
+macOS Apple Silicon 示例；Intel Mac 或 Linux 按上述规则替换程序名：
 
 ```sh
-chmod +x ./jishuya-image/bin/jishuya-image
-./jishuya-image/bin/jishuya-image install --codex --prefer
-./jishuya-image/bin/jishuya-image init
+chmod +x ./jishuya-image/bin/jishuya-image-darwin-arm64
+./jishuya-image/bin/jishuya-image-darwin-arm64 init
 ```
 
 `init` 在用户可见终端隐藏输入 Key，检查模型列表后保存配置；不会生成图片。默认模型为已完成基础生图实测的 `gpt-image-2`。可用 `init --model 模型名称` 保存其他默认模型，或在单次命令中用 `--model gpt-image-2.6-sunburst` / `--model gpt-image-2.6-flare` 显式选择 2.6。账号需具备对应图片模型权限。
 
-已配置环境变量 `JISHUYA_IMAGE_API_KEY` 时可用 `init --from-env` 保存到本机。不要将 Key 放入命令参数、聊天、源码或分发包。
+也可以为实际运行程序的宿主进程设置环境变量 `JISHUYA_IMAGE_API_KEY`，直接使用，无需 `init`，不会将 Key 保存到配置文件。需要持久保存时再运行 `init --from-env`。不要将 Key 放入命令参数、聊天、源码或分发包。
 
-`install --codex --prefer` 启用生图默认偏好，向个人 Codex 规则追加可移除的管理块，保留原有规则并在修改前备份。无 `--prefer` 时仅安装；`install --codex --no-prefer` 取消管理块。安装和初始化是用户执行的入口，复制 skill 文件本身不会自动运行初始化程序。
+`init` 只负责保存 Key 与默认模型，不复制技能或修改个人规则。v2.1.0 已取消 `install`、`uninstall` 和 `init --prefer`，旧命令会返回迁移提示或参数错误。
 
-安装程序优先升级现有同名技能；全新安装使用用户的 `.agents/skills/jishuya-image`。设置 `CODEX_HOME` 时使用其 `skills/jishuya-image`，已有 `.codex/skills/jishuya-image` 也原地升级。发现两份同名技能时报告冲突。安装后在 Codex 新对话检查技能是否已发现；未发现时重启 Codex。
+## 升级、停用与卸载
+
+| 操作 | 步骤 | Key 与图片 |
+|---|---|---|
+| 升级 | 等待正在运行的任务结束；将旧文件夹移到技能发现目录之外备份，再把新版完整文件夹放回原位置，打开新对话 | 用户配置在技能目录外，自动复用；保留旧目录内自己的图片或其他文件 |
+| 停用 | 将整个技能文件夹移出所有技能发现目录，再开启新对话；恢复时移回 | 配置和图片保留 |
+| 卸载 | 停止使用后移除技能文件夹，开启新对话 | 默认保留用户配置和图片，日后重新解压可继续使用 |
+| 彻底清理 | 卸载后按下文位置删除 `jishuya-image` 用户配置目录（含旧版 `backups/`），清除自行设置的 Key 环境变量及旧偏好块 | 图片由用户自行决定是否删除；删除配置后需要重新配置 Key |
+
+备份目录应放在 `.agents/skills`、`.codex/skills` 等技能发现目录之外，仅在原目录改名可能仍会被扫描。升级时不要只覆盖 `SKILL.md`，应整体更换文档和五个平台程序；本项目不自动下载更新。
+
+**从 v2.0.x 迁移**：按升级步骤整体替换，不再运行旧版安装命令。原有 `config.json` 不变。若旧版曾启用默认偏好，程序不会自行修改它；停用或卸载时，在当时使用的个人 `AGENTS.md` 或 `AGENTS.override.md` 中仅移除 `<!-- jishuya-image:begin -->` 到 `<!-- jishuya-image:end -->` 的整段管理块，保留其他规则。继续使用时也可保留该偏好。新版本首次使用不会写入这个管理块。
 
 ## 配置与输出
 
@@ -47,7 +73,7 @@ chmod +x ./jishuya-image/bin/jishuya-image
 - macOS：`~/Library/Application Support/jishuya-image/config.json`。
 - Linux：`$XDG_CONFIG_HOME/jishuya-image/config.json`，未设置时为 `~/.config/jishuya-image/config.json`。
 
-配置以本机权限保护，非加密存储。Windows 限制为当前用户与 SYSTEM；macOS/Linux 目录为 0700、文件为 0600。更新技能不会删除配置。程序只报告 Key 是否存在，不回显 Key。备份位于同一配置目录的 `backups/`。
+配置以本机权限保护，非加密存储。Windows 限制为当前用户与 SYSTEM；macOS/Linux 目录为 0700、文件为 0600。更新技能不会删除配置。程序只报告 Key 是否存在，不回显 Key。旧版备份可能位于同一配置目录的 `backups/`；新版本不会再创建安装或规则备份。移动文件夹到另一台电脑不会带走本机配置，需要在目标电脑配置 Key。
 
 受限沙箱可能以其他 Windows 用户身份运行，或禁用外网访问。宿主需要允许本次程序读取配置、访问技术鸭、写入输出目录；这些权限不能由 skill 自动授予。若已有运行环境的 Key 变量，程序优先使用，即使配置文件不可读也可运行。权限被拒绝时按宿主正常审批流程处理，禁止审批的环境可在本机终端执行；不建议关闭沙箱或放宽密钥文件权限。
 
@@ -55,7 +81,7 @@ chmod +x ./jishuya-image/bin/jishuya-image
 
 ## 使用
 
-安装后可说“生成一张咖啡店海报”“给这张产品图换背景”，也可显式使用 `$jishuya-image`。自动匹配仍取决于 Codex 模型、已有技能和更高优先级指令；默认偏好用于提高匹配机会，不承诺固定触发率。
+放入技能目录并被宿主发现后，可说“生成一张咖啡店海报”“给这张产品图换背景”，也可显式使用 `$jishuya-image`。技能保留常见图片需求描述与 `allow_implicit_invocation: true`，允许自动匹配；实际选择仍取决于模型、已有技能和更高优先级指令，不承诺每次必然调用。
 
 以下 `PROGRAM` 表示程序完整路径：
 
@@ -77,7 +103,7 @@ PROGRAM generate --help
 PROGRAM version
 ```
 
-`models` 返回全部可见模型，保留服务商别名。`doctor` 检查配置、安装与模型访问，不生成图片；`--offline` 跳过联网。无 Key 或默认模型不可见时退出非零。Key 失效后重新执行 `init`。
+`models` 返回全部可见模型，保留服务商别名。`doctor` 报告程序绝对路径、平台、`mode: portable`、配置来源并检查模型访问，不生成图片；`--offline` 跳过联网，不创建配置或复制文件。无 Key 或默认模型不可见时退出非零。Key 失效后重新执行 `init` 或更新宿主环境变量。
 
 参数范围见 `SKILL.md`。PNG/JPEG 输出检查签名和可解码头部，GIF 完整解码并要求至少两帧，WebP 检查签名，SVG 检查完整 XML 及根元素。输入图检查签名，尺寸和透明度由端点继续验证。
 
@@ -85,7 +111,7 @@ PROGRAM version
 
 请求固定发送到 `https://www.jishuya.net/v1`；生成使用 JSON，编辑使用 multipart，多参考图为 `image[]`，SVG 作者使用嵌套字段。支持 Base64 或 HTTPS 下载；仅同源下载携带鉴权，所有请求禁用重定向。失败、超时和流中断不自动重试。
 
-客户端提供 GIF、SVG、标注图和 SSE 等参数入口；客户端能组装请求不等于服务端完整实现。2026-11-09 对最终包的代表性实测结果如下：
+客户端提供 GIF、SVG、标注图和 SSE 等参数入口；客户端能组装请求不等于服务端完整实现。以下为 2026-11-09 v2.0.x 的真实接口实测结果；v2.1.0 仅调整免安装流程和打包，未改变图片请求代码，本轮未重复付费调用：
 
 | 能力 | 实测模型 | 结果 |
 |---|---|---|
@@ -116,12 +142,13 @@ PROGRAM version
 ```sh
 go test ./...
 go vet ./...
-go build -trimpath -o bin/jishuya-image .
 go run ./tools/release
 ```
 
-Windows 构建输出改为 `bin/jishuya-image.exe`。正式版本使用 `CGO_ENABLED=0` 编译。仅源码构建需要 Go；终端隐藏输入和 Windows 权限依赖的 Go 模块编译进程序。
+发行工具使用 `CGO_ENABLED=0` 编译。仅源码构建需要 Go；终端隐藏输入和 Windows 权限依赖的 Go 模块编译进程序。
 
-发布工具生成 Windows x64、macOS x64/ARM64、Linux x64/ARM64 压缩包及 SHA-256 清单。每包只含 `SKILL.md`、`README.md`、`agents/openai.yaml`、依赖许可说明和本平台程序。macOS 包未签名/公证；是否完成各平台运行测试见测试报告，不把交叉编译当作实机验证。
+发布工具生成 `dist/jishuya-image-v2.1.0-universal.zip` 和 `dist/SHA256SUMS.txt`。ZIP 白名单共 9 个文件：4 个文档/元数据文件和 5 个程序，不包含 Key、用户配置、源码或测试日志。五个平台的选择路径与 `SKILL.md` 一致。运行测试范围见 `TEST-REPORT.md`。
+
+Codex 技能发现与隐式调用说明：[官方文档](https://developers.openai.com/codex/skills/)。
 
 技术鸭网站：`https://www.jishuya.net`。教程：`https://docs.jishuya.net/`。
