@@ -1,0 +1,6 @@
+interface:
+  display_name: "技术鸭生图"
+  short_description: "生成海报、封面、产品图，或使用参考图换背景、修改配色与局部内容"
+  default_prompt: "使用 $jishuya-image 生成或编辑一张符合需求的图片。"
+policy:
+  allow_implicit_invocation: true

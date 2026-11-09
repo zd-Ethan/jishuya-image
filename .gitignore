@@ -1,0 +1,5 @@
+/bin/
+/dist/
+/jishuya-output/
+*.test
+coverage.out
