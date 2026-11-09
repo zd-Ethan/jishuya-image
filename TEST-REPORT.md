@@ -43,11 +43,11 @@
 
 ## 证据与未覆盖范围
 
-诊断证据位于 `D:\XT\zm\jishuya-image-validation\capabilities-20261109`。每例 `.json` 为参数，`.result.json` 为脱敏响应及结果；对应目录保留实际文件。`gif-frames.png` 和 `mask-pixel-inspection.json` 分别记录动画帧和编辑范围检查。
+诊断证据现整理到 `D:\project\jishuya-newapi\jishuya-image-validation\evidence\capabilities-20261109`。每例 `.json` 为参数，`.result.json` 为脱敏响应及结果；对应目录保留实际文件。`gif-frames.png` 和 `mask-pixel-inspection.json` 分别记录动画帧和编辑范围检查。历史记录中的绝对路径是执行时路径；目录迁移不改写原始响应，现位置见验证目录的 `README.md`。
 
 未覆盖：GIF 2–16 帧及时间范围的全部边界、其他尺寸和数量上限、16 张参考图上限、所有模型的所有参数组合、SVG 作者模型与推理参数、macOS/Linux 实机运行、新 Codex 对话完整触发率。SVG 主路径仍未通过，没有为不可验收的作者参数盲目增加付费调用。
 
-首轮 v2.0.0 共 15 次真实请求的记录仍保留在 `jishuya-image-validation/final-package`。该轮 GIF、SSE 和标注的失败结论已由本轮有条件成功的结果更新，不再作为当前版本的一概判断。
+首轮 v2.0.0 共 15 次真实请求的记录保留在验证目录的 `evidence/initial-validation`。该轮 GIF、SSE 和标注的失败结论已由本轮有条件成功的结果更新，不再作为当前版本的一概判断。
 
 ## 发行包与最终验证
 
@@ -55,5 +55,14 @@
 - Windows ZIP 隔离安装和当前用户升级均通过；安装副本的 5 个文件与 ZIP 相同。源码 `bin/jishuya-image.exe` 和 `D:\XT\zm\jishuya-image.zip` 已同步。
 - 配置文件与个人规则哈希未变；仅保留 Windows 系统 PATH 时，程序版本和离线诊断仍成功，确认用户运行不依赖语言环境。
 - 最终 ZIP 额外执行 1 次真实流式请求（Flare、xhigh、partial_images=1），27.36 秒成功保存最终图，同时提示实际尺寸 1254×1254、实际质量 medium、缺少中间图。此次请求使用当前交付二进制；本轮总计 **23 次**真实生成/编辑请求。
-- Windows ZIP SHA-256：`2b11736ade123ba3aeaf6e81a6fd364d7366438a3099cb8992f26824a52050f7`。
+- 上述真实流式测试所用 Windows ZIP SHA-256：`2b11736ade123ba3aeaf6e81a6fd364d7366438a3099cb8992f26824a52050f7`。
 - `package-checks.json`、`archives.json` 和 `final-package-stream.json` 保存最终验证证据。Flare 的 4 帧接触表确认圆球横向移动。
+
+## 目录整理后的最终包
+
+同日按用户要求整理验证目录并补充跨平台选包说明；没有修改 API 请求代码，也没有新增付费调用。最终包位于 `D:\project\jishuya-newapi\jishuya-image-validation\dist`，源码仍在 `D:\XT\zm\jishuya-image`。
+
+- 重新生成五平台 v2.0.1 包，核对 SHA-256、文件清单、文档一致性和程序架构：Windows PE/x64、macOS Mach-O/x64 与 ARM64、Linux ELF/x64 与 ARM64。Unix 可执行权限元数据为 0755。
+- Windows 升级安装、仅保留系统 PATH 的离线诊断通过；安装副本与源码分发文件一致，Key 配置和个人规则哈希未变。macOS/Linux 仍未实机运行。
+- 当前 Windows ZIP SHA-256：`e51828b0c3b7d9d1a99057d0ed2a921e44ec602603814bb3bf98b4a8de61cd09`。完整清单见 `dist/SHA256SUMS.txt`。
+- 目录内 `evidence/final-package-checks.json` 和 `evidence/windows-install-check.json` 保存本次检查结果；`archive/index.json` 记录旧文件位置。递归删除被执行策略拒绝，旧 Python、重复解压包和临时安装资料已移动至 `archive/obsolete`，没有实际删除。

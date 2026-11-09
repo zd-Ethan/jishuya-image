@@ -14,6 +14,8 @@
 | Linux x64 | [jishuya-image-v2.0.1-linux-amd64.zip](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.0.1-linux-amd64.zip) |
 | Linux ARM64 | [jishuya-image-v2.0.1-linux-arm64.zip](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.0.1-linux-arm64.zip) |
 
+每个包只带对应系统和 CPU 架构的程序。Windows 的 `jishuya-image.exe` 不能直接在 macOS/Linux 运行；这两个系统请使用对应包内的 `bin/jishuya-image`。`darwin` 表示 macOS，`amd64` 表示 Intel/AMD x64，`arm64` 适用于 Apple Silicon 或 ARM64 Linux。macOS/Linux 可用 `uname -m` 查看架构：`x86_64` 选 amd64，`arm64`/`aarch64` 选 arm64。五个平台均不需要额外安装 Python、Node.js 或 Go；macOS/Linux 当前完成交叉编译和包检查，尚未实机验证。
+
 下载对应系统和架构的压缩包并解压，在终端运行。Windows PowerShell：
 
 ```powershell

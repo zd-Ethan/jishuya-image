@@ -1,5 +1,5 @@
-2b11736ade123ba3aeaf6e81a6fd364d7366438a3099cb8992f26824a52050f7  jishuya-image-v2.0.1-windows-amd64.zip
-5efebeb45d7c9abac27d837402a14eb7dc8642863a5d362d6d7cc45280bb60bd  jishuya-image-v2.0.1-darwin-amd64.zip
-d5db89396e9258f6232f0b106692b441690fa5ab388a00d90d01ab7a0d7b60ea  jishuya-image-v2.0.1-darwin-arm64.zip
-f5e2f9d9ff6edbd015e1849c7cf73dc5a03e7e1dc2349b86e17f9f81f692084b  jishuya-image-v2.0.1-linux-amd64.zip
-5ea4107b989036a539f577b60fd057828eb25ae381b5ef0d15c464ac7cabe46b  jishuya-image-v2.0.1-linux-arm64.zip
+e51828b0c3b7d9d1a99057d0ed2a921e44ec602603814bb3bf98b4a8de61cd09  jishuya-image-v2.0.1-windows-amd64.zip
+6d8aacfe6a749dfea483aa5194c939311d1e3a03995ce1eea08c5e9aba02d4c9  jishuya-image-v2.0.1-darwin-amd64.zip
+322c7ff27aaa0b9449396e517f2504c9894d48a5042f5916c2bcf382b45d968b  jishuya-image-v2.0.1-darwin-arm64.zip
+dde96a0222106388d19719a97194879411270bbad44e0e84d9bf07f9d284cca6  jishuya-image-v2.0.1-linux-amd64.zip
+30e3dac826139d3fa34adb9925f4f50fef7ca740b662fbe93162c30bd8168072  jishuya-image-v2.0.1-linux-arm64.zip
