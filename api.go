@@ -290,6 +290,10 @@ func (client *apiClient) generate(ctx context.Context, options imageOptions) (im
 				break
 			}
 		}
+		// 平台可能同时返回已有图片和错误；保留图片但不能报告整体成功。
+		if len(payload.Error) > 0 && string(payload.Error) != "null" {
+			err = errors.Join(err, fmt.Errorf("图片生成失败，勿自动重提：%s", errorDetail(data)))
+		}
 	}
 	if err == nil && len(result.Paths) != options.Count {
 		err = fmt.Errorf("请求 %d 张，收到 %d 张最终图片；请核对控制台记录，勿自动重提", options.Count, len(result.Paths))

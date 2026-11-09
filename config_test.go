@@ -92,6 +92,44 @@ func TestCLIHelpAndJSON(t *testing.T) {
 	}
 }
 
+func TestImageHelpWithBrokenConfig(t *testing.T) {
+	isolatedHome(t)
+	path, _ := configPath()
+	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte("invalid-json"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, command := range []string{"generate", "edit"} {
+		var output bytes.Buffer
+		_, err := runCLI(context.Background(), []string{command, "--help"}, os.Stdin, &output)
+		if !errors.Is(err, flag.ErrHelp) || !strings.Contains(output.String(), "-prompt") {
+			t.Fatalf("%s 帮助被配置错误阻止：%v", command, err)
+		}
+	}
+}
+
+func TestEnvironmentWithoutUserDirectory(t *testing.T) {
+	isolatedHome(t)
+	t.Setenv("APPDATA", "")
+	t.Setenv("HOME", "")
+	t.Setenv("XDG_CONFIG_HOME", "")
+	t.Setenv(keyEnv, "environment-fixture")
+	settings, source, err := loadConfig()
+	if err != nil || source != "environment" || settings.APIKey != "environment-fixture" || settings.Model != defaultModel {
+		t.Fatal("缺少用户目录时环境变量模式不可用", source, err)
+	}
+	status, err := diagnose(context.Background(), true)
+	if err != nil || status["config_path"] != "" || status["key_source"] != "environment" {
+		t.Fatal("免配置目录诊断失败", err)
+	}
+	t.Setenv(keyEnv, "")
+	if _, _, err := loadConfig(); err == nil {
+		t.Fatal("无配置目录且无环境变量时应报错")
+	}
+}
+
 func TestEnvironmentWorksWithUnavailableConfig(t *testing.T) {
 	isolatedHome(t)
 	path, _ := configPath()

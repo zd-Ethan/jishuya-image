@@ -1,5 +1,8 @@
 /bin/
 /dist/
 /jishuya-output/
+/jishuya-image/
+/evidence/
+/archive/
 *.test
 coverage.out

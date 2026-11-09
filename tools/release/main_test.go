@@ -2,12 +2,33 @@ package main
 
 import (
 	"archive/zip"
+	"bytes"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
+
+func TestArchiveFailurePreservesPreviousPackage(t *testing.T) {
+	directory := t.TempDir()
+	path := filepath.Join(directory, "universal.zip")
+	previous := []byte("previous-package-fixture")
+	if err := os.WriteFile(path, previous, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeArchive(t.TempDir(), t.TempDir(), path); err == nil {
+		t.Fatal("缺少必需文件应打包失败")
+	}
+	actual, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(actual, previous) {
+		t.Fatal("打包失败覆盖了上一次产物", err)
+	}
+	entries, err := os.ReadDir(directory)
+	if err != nil || len(entries) != 1 {
+		t.Fatal("打包失败遗留临时文件", err)
+	}
+}
 
 func TestUniversalArchive(t *testing.T) {
 	root, buildDir := t.TempDir(), t.TempDir()
@@ -40,6 +61,9 @@ func TestUniversalArchive(t *testing.T) {
 		}
 	}
 	path := filepath.Join(t.TempDir(), "universal.zip")
+	if err := os.WriteFile(path, []byte("previous-package-fixture"), 0644); err != nil {
+		t.Fatal(err)
+	}
 	if err := writeArchive(root, buildDir, path); err != nil {
 		t.Fatal(err)
 	}

@@ -34,6 +34,10 @@ func loadConfig() (config, string, error) {
 	environmentKey := strings.TrimSpace(os.Getenv(keyEnv))
 	path, err := configPath()
 	if err != nil {
+		if environmentKey != "" {
+			settings.APIKey = environmentKey
+			return settings, "environment", nil
+		}
 		return settings, "", err
 	}
 	content, err := os.ReadFile(path)

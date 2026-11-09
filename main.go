@@ -14,7 +14,7 @@ import (
 	"slices"
 )
 
-var version = "2.1.0"
+var version = "2.1.1"
 
 const usage = `技术鸭生图 — 解压即用，无需安装语言运行环境
 
@@ -74,14 +74,14 @@ func runCLI(ctx context.Context, args []string, input *os.File, output io.Writer
 	if command != "models" && command != "generate" && command != "edit" {
 		return nil, fmt.Errorf("未知命令 %q；使用 --help 查看帮助", command)
 	}
-	settings, _, err := loadConfig()
-	if err != nil {
-		return nil, err
-	}
+	settings, _, configErr := loadConfig()
 	client := newAPIClient(settings.APIKey)
 	if command == "models" {
 		if len(args) != 1 {
 			return nil, errors.New("models 不接受参数")
+		}
+		if configErr != nil {
+			return nil, configErr
 		}
 		if err := validateKey(settings.APIKey); err != nil {
 			return nil, err
@@ -92,6 +92,10 @@ func runCLI(ctx context.Context, args []string, input *os.File, output io.Writer
 	options, err := parseImageOptions(command, args[1:], settings.Model, output)
 	if err != nil {
 		return nil, err
+	}
+	// 先允许帮助和参数检查完成，配置错误不应阻止用户查阅命令。
+	if configErr != nil {
+		return nil, configErr
 	}
 	if err := validateKey(settings.APIKey); err != nil {
 		return nil, err

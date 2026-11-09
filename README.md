@@ -4,7 +4,7 @@
 
 ## 下载与使用位置
 
-当前发行版为 **v2.1.0**。所有受支持系统下载同一个 [通用免安装包](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.1.0-universal.zip)，[SHA-256 校验清单](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/SHA256SUMS.txt) 与包同目录。请解压并保留整个 `jishuya-image` 文件夹：
+当前发行版为 **v2.1.1**。所有受支持系统下载同一个 [通用免安装包](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/jishuya-image-v2.1.1-universal.zip)，[SHA-256 校验清单](https://github.com/zd-Ethan/jishuya-image/raw/refs/heads/main/dist/SHA256SUMS.txt) 与包同目录。请解压并保留整个 `jishuya-image` 文件夹：
 
 ```text
 jishuya-image/
@@ -19,6 +19,8 @@ jishuya-image/
     jishuya-image-linux-amd64
     jishuya-image-linux-arm64
 ```
+
+GitHub 的 **Code → Download ZIP** 和 `git clone` 获取的是源码仓库；仓库根目录的 `bin/` 不受版本控制。普通用户应下载上面的发行 ZIP。若通过技能管理器从仓库复制了 `SKILL.md`，仍需要放入完整发行包，才能获得可执行程序。
 
 使用位置有两种，程序均直接运行：
 
@@ -73,6 +75,8 @@ chmod +x ./jishuya-image/bin/jishuya-image-darwin-arm64
 - macOS：`~/Library/Application Support/jishuya-image/config.json`。
 - Linux：`$XDG_CONFIG_HOME/jishuya-image/config.json`，未设置时为 `~/.config/jishuya-image/config.json`。
 
+环境变量只覆盖 Key；配置文件可读且有效时，仍沿用其中的默认模型。配置不可读、格式损坏或系统没有用户配置目录时，有环境变量 Key 即可直接运行，模型回退为 `gpt-image-2`，可用 `--model` 指定。此时 `doctor --offline` 的 `config_path` 可能为空；保存配置的 `init` 仍需要有效的用户配置目录。
+
 配置以本机权限保护，非加密存储。Windows 限制为当前用户与 SYSTEM；macOS/Linux 目录为 0700、文件为 0600。更新技能不会删除配置。程序只报告 Key 是否存在，不回显 Key。旧版备份可能位于同一配置目录的 `backups/`；新版本不会再创建安装或规则备份。移动文件夹到另一台电脑不会带走本机配置，需要在目标电脑配置 Key。
 
 受限沙箱可能以其他 Windows 用户身份运行，或禁用外网访问。宿主需要允许本次程序读取配置、访问技术鸭、写入输出目录；这些权限不能由 skill 自动授予。若已有运行环境的 Key 变量，程序优先使用，即使配置文件不可读也可运行。权限被拒绝时按宿主正常审批流程处理，禁止审批的环境可在本机终端执行；不建议关闭沙箱或放宽密钥文件权限。
@@ -111,7 +115,7 @@ PROGRAM version
 
 请求固定发送到 `https://www.jishuya.net/v1`；生成使用 JSON，编辑使用 multipart，多参考图为 `image[]`，SVG 作者使用嵌套字段。支持 Base64 或 HTTPS 下载；仅同源下载携带鉴权，所有请求禁用重定向。失败、超时和流中断不自动重试。
 
-客户端提供 GIF、SVG、标注图和 SSE 等参数入口；客户端能组装请求不等于服务端完整实现。以下为 2026-11-09 v2.0.x 的真实接口实测结果；v2.1.0 仅调整免安装流程和打包，未改变图片请求代码，本轮未重复付费调用：
+客户端提供 GIF、SVG、标注图和 SSE 等参数入口；客户端能组装请求不等于服务端完整实现。以下为 2026-11-09 v2.0.x 的真实接口实测结果；v2.1.0 调整免安装流程，v2.1.1 修复配置、错误处理与打包边界，本轮未重复付费调用：
 
 | 能力 | 实测模型 | 结果 |
 |---|---|---|
@@ -135,9 +139,44 @@ PROGRAM version
 
 表中 `2.6-*` 的完整模型名以 `gpt-image-2.6-` 开头。GIF 提示词应明确文件格式、运动内容、帧数和时长；仅传 `--format gif` 的旧用例曾返回 PNG。对精确尺寸和标注位置，同样在提示词说明要求并核对结果。不能据此宣称全功能或所有参数组合均已验证；默认采用 PNG、非流式调用。失败选项不自动重复提交、降级或换模型，也不通过本地格式转换或缩放冒充端点原生支持。完整请求记录与验证范围见源码目录的 `TEST-REPORT.md`。
 
-单个 JSON/下载响应及单行 SSE 事件限制 256 MiB；超时默认 600 秒，可通过 `--timeout` 调整。SSE 兼容标准图片事件和技术鸭 `image.generation.result` 的 `data` 数组，忽略不含图片的进度事件；随图片事件保存文件，命令结束时输出路径，宿主没有实时预览。
+单个 JSON/下载响应及单行 SSE 事件限制 256 MiB；超时默认 600 秒，可通过 `--timeout` 调整。SSE 兼容标准图片事件和技术鸭 `image.generation.result` 的 `data` 数组，忽略不含图片的进度事件；随图片事件保存文件，命令结束时输出路径，宿主没有实时预览。普通 JSON 同时包含图片与 `error` 时，保留成功保存的图片并返回失败；按 `result.paths` 获取已有结果，不自动重试。
+
+## 常见问题
+
+| 现象 | 检查与处理 |
+|---|---|
+| AI 没有自动调用 | 确认完整文件夹在宿主的技能发现目录，只保留一份同名技能，打开新对话；也可显式使用 `$jishuya-image` 或提供 `SKILL.md` 路径 |
+| 找不到程序 | 确认解压的是发行 ZIP，且 `bin/` 包含五个程序；按执行环境选择，不使用旧 `jishuya-image.exe` 路径 |
+| macOS/Linux 报执行格式错误 | 用 `uname -s`、`uname -m` 核对系统和架构；WSL 使用 Linux 程序 |
+| macOS/Linux 无执行权限 | 对选定的程序执行 `chmod +x`；系统来源拦截按系统提示由用户确认 |
+| 尚未配置 Key | 运行 `doctor --offline` 检查来源；在可见终端运行 `init`，或向实际宿主进程设置环境变量 |
+| 配置文件损坏或无法读取 | 仍可使用 `generate --help` / `edit --help`；用 `init` 重建配置，或使用环境变量 Key；权限限制按宿主流程处理 |
+| 模型不可见、HTTP 401/403 | 核对 Key 是否有效及模型权限，用 `models` 查询，选择账号实际可用的模型 |
+| 超时、HTTP 429/5xx、流中断 | 先核对控制台任务与额度、返回的已有路径；确认结果后再决定是否重试 |
+| 请求 GIF/JPEG/WebP/SVG 却报格式不符 | 检查能力表；GIF 提示词明确要求动画，其他未通过格式不能按扩展名伪装成功 |
+
+`doctor --offline` 只检查本地配置；`doctor` / `models` 查询模型并有 30 秒超时。只有 `generate` / `edit` 提交图片请求；命令成功不代表图片语义、尺寸或所有选项都符合要求，仍需检查实际文件与 `warnings`。
 
 ## 开发与分发
+
+本机唯一维护目录为 `D:\project\jishuya-newapi\jishuya-image-validation`，根目录包含 `.git` 和完整源码。`dist/` 存放最终通用包；本机的 `jishuya-image/` 是已解压的使用副本，`evidence/` 保存验证资料，`archive/` 保存可恢复的旧文件。这三个本机资料目录不提交 Git，也不进入发行包。历史报告位于源码的 `docs/TEST-HISTORY.md`，其中旧绝对路径是执行时记录。
+
+源码需要 Go 1.26 或更新版本。主要文件职责：
+
+| 路径 | 职责 |
+|---|---|
+| `SKILL.md`、`agents/openai.yaml` | 图片需求触发描述、平台选择与执行指令 |
+| `main.go`、`config.go` | 命令入口、诊断和用户配置 |
+| `options.go` | 图片参数校验与请求字段映射 |
+| `api.go` | HTTP、编辑上传、流式解析及图片保存 |
+| `permissions_*.go` | Windows ACL 与 Unix 文件权限 |
+| `*_test.go` | 默认运行的本地测试；网络测试使用本地模拟服务 |
+| `live_probe_test.go` | 需显式开启的真实接口验证，会使用技术鸭额度 |
+| `tests/trigger-cases.json` | 人工触发评估样例，不是自动触发率测试结果 |
+| `tools/release/` | 五平台编译、通用包白名单与归档测试 |
+| `TEST-REPORT.md` | 当前复核结论和历史接口验证范围 |
+
+在仓库根目录运行：
 
 ```sh
 go test ./...
@@ -147,7 +186,9 @@ go run ./tools/release
 
 发行工具使用 `CGO_ENABLED=0` 编译。仅源码构建需要 Go；终端隐藏输入和 Windows 权限依赖的 Go 模块编译进程序。
 
-发布工具生成 `dist/jishuya-image-v2.1.0-universal.zip` 和 `dist/SHA256SUMS.txt`。ZIP 白名单共 9 个文件：4 个文档/元数据文件和 5 个程序，不包含 Key、用户配置、源码或测试日志。五个平台的选择路径与 `SKILL.md` 一致。运行测试范围见 `TEST-REPORT.md`。
+发布工具生成 `dist/jishuya-image-v2.1.1-universal.zip` 和 `dist/SHA256SUMS.txt`，完成临时 ZIP 后才替换目标，文件缺失等打包失败不会覆盖已有包。ZIP 白名单共 9 个文件：4 个文档/元数据文件和 5 个程序，不包含 Key、用户配置、源码或测试日志。五个平台的选择路径与 `SKILL.md` 一致。发布时应一并更新程序版本、发行工具默认版本和本文下载链接，重新生成 ZIP 与校验清单；`dist/` 当前版本之外的旧包另行归档。
+
+v2.1.1 修复：损坏配置不再阻止图片命令帮助；环境变量 Key 不再依赖用户配置目录；普通 JSON 的部分成功结果保留图片并报告错误；打包失败保留旧 ZIP。完整测试与未覆盖范围见 `TEST-REPORT.md`，不把本地模拟测试当作真实端点验收。
 
 Codex 技能发现与隐式调用说明：[官方文档](https://developers.openai.com/codex/skills/)。
 

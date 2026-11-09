@@ -337,6 +337,24 @@ func TestResponseMetadataWarnings(t *testing.T) {
 	}
 }
 
+func TestJSONErrorPreservesImages(t *testing.T) {
+	var calls atomic.Int32
+	client, _ := mockClient(t, func(writer http.ResponseWriter, request *http.Request) {
+		calls.Add(1)
+		json.NewEncoder(writer).Encode(map[string]any{
+			"data":  []imageItem{{Base64: base64.StdEncoding.EncodeToString(testImage(t, "png"))}},
+			"error": map[string]string{"message": "upstream failed"},
+		})
+	})
+	result, err := client.generate(context.Background(), testOptions(t))
+	if err == nil || !strings.Contains(err.Error(), "upstream failed") || len(result.Paths) != 1 || calls.Load() != 1 {
+		t.Fatal("返回图片时仍必须报告平台错误且不重试", result, err, calls.Load())
+	}
+	if _, err := os.Stat(result.Paths[0]); err != nil {
+		t.Fatal("已收到的图片没有保留", err)
+	}
+}
+
 func TestRequestCancellation(t *testing.T) {
 	var count atomic.Int32
 	client, _ := mockClient(t, func(writer http.ResponseWriter, request *http.Request) {

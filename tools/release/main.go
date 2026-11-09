@@ -36,15 +36,22 @@ func packageFiles() []string {
 	return files
 }
 
-// writeArchive 从源码读取文档、从临时构建目录读取程序，并保留 Unix 可执行权限。
+// writeArchive 完整写入临时 ZIP 后再替换目标，避免失败时损坏已有发行包。
 func writeArchive(root, buildDir, path string) (err error) {
-	file, err := os.Create(path)
+	file, err := os.CreateTemp(filepath.Dir(path), ".jishuya-package-*.zip")
 	if err != nil {
 		return err
 	}
+	defer os.Remove(file.Name())
 	writer := zip.NewWriter(file)
 	defer func() {
 		err = errors.Join(err, writer.Close(), file.Close())
+		if err == nil {
+			err = os.Chmod(file.Name(), 0644)
+		}
+		if err == nil {
+			err = os.Rename(file.Name(), path)
+		}
 	}()
 	for _, name := range packageFiles() {
 		source := filepath.Join(root, name)
@@ -74,7 +81,7 @@ func writeArchive(root, buildDir, path string) (err error) {
 
 // run 完成全部平台编译后才输出通用 ZIP 与校验清单。
 func run() error {
-	version := flag.String("version", "2.1.0", "发行版本")
+	version := flag.String("version", "2.1.1", "发行版本")
 	flag.Parse()
 	root, err := os.Getwd()
 	if err != nil {

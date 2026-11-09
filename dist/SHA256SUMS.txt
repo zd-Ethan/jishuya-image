@@ -1,1 +1,1 @@
-02d9a6161ddcf65af07a88a30301a55d14119740eb404cdedb04c9e656c3d8d7  jishuya-image-v2.1.0-universal.zip
+b965febc88f617ece9b04ab4bb7ab84c4d7ddaae1ed93a4e932a73d1141bb0b3  jishuya-image-v2.1.1-universal.zip
